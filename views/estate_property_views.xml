@@ -1,21 +1,96 @@
 <odoo>
 
-    <!-- VISTA LIST (ANTES ERA TREE) -->
-    <record id="view_estate_property_list" model="ir.ui.view">
-        <field name="name">estate.property.list</field>
-        <field name="model">estate.property</field>
-        <field name="arch" type="xml">
-            <list>
-                <field name="name"/>
-            </list>
-        </field>
-    </record>
-
     <!-- ACCIÓN -->
     <record id="action_estate_property" model="ir.actions.act_window">
         <field name="name">Propiedades</field>
         <field name="res_model">estate.property</field>
         <field name="view_mode">list,form</field>
     </record>
+
+    <!-- VISTA LISTA -->
+    <record id="estate_property_view_list" model="ir.ui.view">
+        <field name="name">estate.property.list</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <list string="Propiedades">
+                <field name="name" width="25%"/>
+                <field name="postcode" width="10%"/>
+                <field name="bedrooms" width="8%"/>
+                <field name="living_area" width="10%"/>
+                <field name="expected_price" width="12%"/>
+                <field name="selling_price" width="12%"/>
+                <field name="date_availability" width="13%"/>
+            </list>
+        </field>
+    </record>
+
+    <!-- form que se ve cuando se apreta una propiedad en el menu principal (chapter 6) -->
+   <record id="view_estate_property_form" model="ir.ui.view">
+        <field name="name">estate.property.form</field>
+        <field name="model">estate.property</field>
+        <field name="arch" type="xml">
+            <form string="Property">
+                <sheet>
+                    <!-- Título grande con nombre de la propiedad-->
+                    <div class="oe_title">
+                        <label for="name" class="oe_edit_only"/>
+                        <h1>
+                            <field name="name" class="oe_inline"/>
+                        </h1>
+                    </div>
+
+                    <!-- Datos principales en dos columnas(cada group es una columna) -->
+                    <group>
+                        <group>
+                            <field name="postcode"/>
+                            <field name="date_availability"/>
+                        </group>
+                        <group>
+                            <field name="expected_price"/>
+                            <field name="selling_price" readonly="1"/>
+                        </group>
+                    </group>
+
+                    <!-- campos que quedan en la pestaña description -->
+                    <notebook>
+                        <page string="Description">
+                            <group>
+                                <field name="description"/>
+                                <field name="bedrooms"/>
+                                <field name="living_area"/>
+                                <field name="facades"/>
+                                <field name="garage"/>
+                                <field name="garden"/>
+                                <field name="garden_area"/>
+                                <field name="garden_orientation"/>
+                            </group>
+                        </page>
+                    </notebook>
+                </sheet>
+            </form>
+        </field>
+    </record>
+
+    <!-- search (Chapter 6) -->
+    <record id="estate_property_search" model="ir.ui.view">
+            <field name="name">estate.property.search</field>
+            <field name="model">estate.property</field>
+            <field name="arch" type="xml">
+                <search string="Properties">
+                    <field name="name"/>
+                    <field name="postcode"/>
+                    <field name="expected_price"/>
+                    <field name="bedrooms"/>
+                    <field name="living_area"/>
+                    <field name="facades"/>
+                    <!-- filtro para filtrar por availability de la propiedad-->
+                    <filter name="available_filter" string="Available" domain="['|', ('state', '=', 'new'), ('state', '=', 'offer_received')]"/>
+                    <!-- agrupar por codigo postal-->
+                    <filter name="postcode_group" context="{'group_by': 'postcode'}" string="Postcode"/>
+                </search>
+            </field>
+    </record>
+    
+      
 
 </odoo>

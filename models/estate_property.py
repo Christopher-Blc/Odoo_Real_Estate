@@ -1,4 +1,4 @@
-from odoo import fields, models
+from odoo import fields, models , api
 
 class EstateProperty(models.Model):
     
@@ -27,6 +27,16 @@ class EstateProperty(models.Model):
         selection =[('north', 'North'), ('south', 'South') , ('east', 'East') , ('west', 'West')],
         string = 'Garden orientation'
     )
+    #onchanged del garden 
+    @api.onchange("garden")
+    def _onchange_garden(self):
+        if self.garden:
+            self.garden_area = 10
+            self.garden_orientation = "north"
+        else:
+            self.garden_area = 0
+            self.garden_orientation = False
+
     active = fields.Boolean(default=True)
     state = fields.Selection(
 
@@ -65,4 +75,29 @@ class EstateProperty(models.Model):
         "property_id",
         string="Offers"
     )
+
+    #Chapter 8 (campo calculado para el area total que es suma del garden y living area)
+    total_area = fields.Integer(
+        string="Total Area (sqm)",
+        compute="_compute_total_area"
+    )
+
+    @api.depends("living_area", "garden_area")
+    def _compute_total_area(self):
+        for record in self:
+            record.total_area = (record.living_area or 0) + (record.garden_area or 0)
+
+    #Chapter 8 (campo calculado para variable almacenable best offer que se actualiza y se guarda))
+    best_offer = fields.Float(
+        string="Best Offer",
+        compute="_compute_best_offer",
+        store=True
+    )
+
+    @api.depends("offer_ids.price")
+    def _compute_best_offer(self):
+        for record in self:
+            prices = record.offer_ids.mapped("price")
+            record.best_offer = max(prices) if prices else 0.0
+
 

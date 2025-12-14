@@ -1,17 +1,27 @@
-from odoo import fields, models
+from odoo import fields, models, api
+from datetime import timedelta
 
 class EstatePropertyOffer(models.Model):
     _name = "estate.property.offer"
     _description = "Oferta"
 
     price = fields.Float(required=True)
+
+    validity = fields.Integer(
+        default=7
+    )
+
+    date_deadline = fields.Date(
+        compute="_compute_date_deadline",
+        inverse="_inverse_date_deadline"
+    )
+
     status = fields.Selection(
         [
             ("accepted", "Accepted"),
             ("refused", "Refused"),
         ],
-        string="Status",
-        copy=False,
+        copy=False
     )
 
     partner_id = fields.Many2one(
@@ -26,3 +36,19 @@ class EstatePropertyOffer(models.Model):
         required=True,
         ondelete="cascade"
     )
+
+    @api.depends("create_date", "validity")
+    def _compute_date_deadline(self):
+        for record in self:
+            if record.create_date:
+                record.date_deadline = (
+                    record.create_date.date() + timedelta(days=record.validity)
+                )
+            else:
+                record.date_deadline = False
+
+    def _inverse_date_deadline(self):
+        for record in self:
+            if record.create_date and record.date_deadline:
+                delta = record.date_deadline - record.create_date.date()
+                record.validity = delta.days

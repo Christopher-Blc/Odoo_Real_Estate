@@ -2,7 +2,7 @@
 
     <!-- ACCIÓN -->
     <record id="action_estate_property" model="ir.actions.act_window">
-        <field name="name">Propiedades</field>
+        <field name="name">Properties</field>
         <field name="res_model">estate.property</field>
         <field name="view_mode">list,form</field>
     </record>
@@ -12,14 +12,18 @@
         <field name="name">estate.property.list</field>
         <field name="model">estate.property</field>
         <field name="arch" type="xml">
-            <list string="Propiedades">
-                <field name="name" width="25%"/>
-                <field name="postcode" width="10%"/>
-                <field name="bedrooms" width="8%"/>
-                <field name="living_area" width="10%"/>
-                <field name="expected_price" width="12%"/>
-                <field name="selling_price" width="12%"/>
-                <field name="date_availability" width="13%"/>
+            <list string="Properties">
+               <field name="name" width="25"/>
+               <field name="postcode" width="10"/>
+               <field name="bedrooms" width="8"/>
+               <field name="living_area" width="10"/>
+               <field name="expected_price" width="12"/>
+               <field name="selling_price" width="12"/>
+               <field name="date_availability" width="13"/>
+               <field name="property_type_id" width="13"/>
+               <!-- <field name="buyer_id"/> -->
+               <!-- <field name="salesman_id"/> -->
+
             </list>
         </field>
     </record>
@@ -42,6 +46,8 @@
                     <!-- Datos principales en dos columnas(cada group es una columna) -->
                     <group>
                         <group>
+                            <field name="tag_ids" widget="many2many_tags" nolabel="1"/>
+                            <field name="property_type_id"/>
                             <field name="postcode"/>
                             <field name="date_availability"/>
                         </group>
@@ -65,6 +71,24 @@
                                 <field name="garden_orientation"/>
                             </group>
                         </page>
+
+                        <page string="Other info">
+                            <group>
+                                <field name="buyer_id"/>
+                                <field name="salesman_id"/>
+                            </group>
+                        </page>
+
+                        <page string="Offers">
+                            <field name="offer_ids">
+                                <list editable="bottom">
+                                    <field name="price"/>
+                                    <field name="partner_id"/>
+                                    <field name="status"/>
+                                </list>
+                            </field>
+                        </page>
+                        
                     </notebook>
                 </sheet>
             </form>
@@ -83,6 +107,7 @@
                     <field name="bedrooms"/>
                     <field name="living_area"/>
                     <field name="facades"/>
+                    <field name="property_type_id"/>
                     <!-- filtro para filtrar por availability de la propiedad-->
                     <filter name="available_filter" string="Available" domain="['|', ('state', '=', 'new'), ('state', '=', 'offer_received')]"/>
                     <!-- agrupar por codigo postal-->

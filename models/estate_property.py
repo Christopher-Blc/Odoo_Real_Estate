@@ -1,4 +1,7 @@
-from odoo import fields, models , api
+from odoo import fields, models , api 
+from odoo.exceptions import UserError
+
+
 
 class EstateProperty(models.Model):
     
@@ -27,6 +30,7 @@ class EstateProperty(models.Model):
         selection =[('north', 'North'), ('south', 'South') , ('east', 'East') , ('west', 'West')],
         string = 'Garden orientation'
     )
+
     #onchanged del garden 
     @api.onchange("garden")
     def _onchange_garden(self):
@@ -101,3 +105,15 @@ class EstateProperty(models.Model):
             record.best_offer = max(prices) if prices else 0.0
 
 
+
+    def action_sold(self):
+        for record in self:
+            if record.state == "cancelled":
+                raise UserError("A cancelled property cannot be sold.")
+            record.state = "sold"
+
+    def action_cancel(self):
+        for record in self:
+            if record.state == "sold":
+                raise UserError("A sold property cannot be cancelled.")
+            record.state = "cancelled"

@@ -1,5 +1,5 @@
 from odoo import fields, models, api
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError , ValidationError
 from datetime import timedelta
 
 class EstatePropertyOffer(models.Model):
@@ -76,6 +76,10 @@ class EstatePropertyOffer(models.Model):
         for offer in self:
             offer.status = "refused"
 
-                
+     # SQL constraints
+    _sql_constraints = [
+        ('check_price', 'CHECK(price > 0)', 'The price must be strictly positive.'),
+    ]
+
 
     

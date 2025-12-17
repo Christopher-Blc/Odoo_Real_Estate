@@ -52,7 +52,7 @@
                     <!-- Datos principales en dos columnas(cada group es una columna) -->
                     <group>
                         <group>
-                            <field name="tag_ids" widget="many2many_tags" nolabel="1"/>
+                            <field name="tag_ids" widget="many2many_tags" nolabel="0"/>
                             <field name="state"/>
                             <field name="property_type_id"/>
                             <field name="postcode"/>

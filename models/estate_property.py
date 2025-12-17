@@ -1,5 +1,6 @@
 from odoo import fields, models , api 
-from odoo.exceptions import UserError
+from odoo.exceptions import UserError , ValidationError
+from odoo.tools import float_compare, float_is_zero
 
 
 
@@ -13,13 +14,13 @@ class EstateProperty(models.Model):
     description = fields.Text()
     postcode = fields.Char()
     date_availability = fields.Date(default=lambda self: fields.Date.add(fields.Date.today() , months = 3))
-    expected_price = fields.Float(required=True)
+    expected_price = fields.Float(required=True , _check_expected_price=True)
     selling_price = fields.Float(
-    readonly=True,
-    copy=False
+        readonly=True,
+        copy=False
     )
     bedrooms = fields.Integer(
-    default=2
+        default=2
     )
     living_area = fields.Integer()
     facades = fields.Integer()
@@ -55,6 +56,8 @@ class EstateProperty(models.Model):
         copy=False,
         default='new',
         required=True,
+        readonly=True 
+        
     )
     property_type_id = fields.Many2one("estate.property.type", string="Property Type")
     
@@ -105,7 +108,7 @@ class EstateProperty(models.Model):
             record.best_offer = max(prices) if prices else 0.0
 
 
-
+    #Chapter 9 (accioes para botones para cambiar estado de la propiedad)
     def action_sold(self):
         for record in self:
             if record.state == "cancelled":
@@ -117,3 +120,28 @@ class EstateProperty(models.Model):
             if record.state == "sold":
                 raise UserError("A sold property cannot be cancelled.")
             record.state = "cancelled"
+
+    # SQL constraints
+    _sql_constraints = [
+        ('check_expected_price', 'CHECK(expected_price > 0)', 'The expected price must be strictly positive.'),
+        ('check_selling_price', 'CHECK(selling_price >= 0)', 'The selling price must be positive.'),
+    ]
+
+    @api.constrains('expected_price')
+    def _check_expected_price(self):
+        for record in self:
+            if float_compare(record.expected_price, 0, precision_digits=2) <= 0:
+                raise ValidationError(("The expected price must be strictly positive."))
+
+    @api.constrains('selling_price', 'expected_price')
+    def _check_selling_price(self):
+        for record in self:
+            # Only check if selling_price is set (i.e., property has been sold)
+            if not float_is_zero(record.selling_price, precision_digits=2):
+                min_price = record.expected_price * 0.9
+                if float_compare(record.selling_price, min_price, precision_digits=2) < 0:
+                    raise ValidationError(
+                        ("The selling price cannot be lower than 90%% of the expected price. "
+                          "Expected: %.2f, Minimum allowed: %.2f, Got: %.2f") % 
+                        (record.expected_price, min_price, record.selling_price)
+                    )

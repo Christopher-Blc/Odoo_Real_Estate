@@ -10,4 +10,6 @@
     "views/estate_property_tag_views.xml"
     ],
     'application': True,
+    
+    
 }
